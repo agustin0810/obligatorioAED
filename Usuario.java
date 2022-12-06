@@ -1,7 +1,9 @@
 public class Usuario {
+    
     private int idUsuario;
     private String usuario;
     private String contraseña;
+
     public int getIdUsuario() {
         return idUsuario;
     }

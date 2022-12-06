@@ -6,11 +6,18 @@ public class Animal {
     private char sexo;
     private boolean desparasitado;
     private boolean vacunado;
+    private String tipo;
     private Date fechaDesparasitado;
     private Date fechaVacunado;
     private Animal padre;
     private Animal madre;
     
+    public String getTipo() {
+        return tipo;
+    }
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
     public int getIdAnimal() {
         return idAnimal;
     }
@@ -59,22 +66,24 @@ public class Animal {
     public void setMadre(Animal madre) {
         this.madre = madre;
     }
-    public Animal(int idAnimal, char sexo, boolean desparasitado, boolean vacunado, Date fechaDesparasitado,
+    public Animal(int idAnimal, char sexo, boolean desparasitado, boolean vacunado, String tipo, Date fechaDesparasitado,
             Date fechaVacunado, Animal padre, Animal madre) {
         this.idAnimal = idAnimal;
         this.sexo = sexo;
         this.desparasitado = desparasitado;
         this.vacunado = vacunado;
+        this.tipo = tipo;
         this.fechaDesparasitado = fechaDesparasitado;
         this.fechaVacunado = fechaVacunado;
         this.padre = padre;
         this.madre = madre;
     }
-    public Animal(int idAnimal, char sexo, boolean desparasitado, boolean vacunado, Animal padre, Animal madre) {
+    public Animal(int idAnimal, char sexo, boolean desparasitado, boolean vacunado, String tipo, Animal padre, Animal madre) {
         this.idAnimal = idAnimal;
         this.sexo = sexo;
         this.desparasitado = desparasitado;
         this.vacunado = vacunado;
+        this.tipo = tipo;
         this.padre = padre;
         this.madre = madre;
     }
@@ -84,6 +93,10 @@ public class Animal {
     @Override
     public String toString() {
         // TODO Auto-generated method stub
-        return this.idAnimal +", "+ this.sexo + ", "+ this.desparasitado +", "+this.vacunado;
+        return this.idAnimal +", "+ this.sexo + ", "+ this.desparasitado +", "+this.vacunado+ ", "+this.tipo;
+    }
+    public String toStringConFecha() {
+        // TODO Auto-generated method stub
+        return this.idAnimal +", "+ this.sexo + ", "+ this.desparasitado +", "+this.vacunado+ ", "+this.tipo+ ", "+ this.fechaDesparasitado +", "+this.fechaVacunado;
     }
 }

@@ -1,316 +1,685 @@
+import java.security.IdentityScope;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
-import javax.swing.SwingConstants;
-
-import aed.ABB;
-
 public class Sistema {
 
     private static Scanner entrada = new Scanner(System.in);
-    private static Empresa empresaSelec = null;
-    private static ArrayList<Usuario> usuarios = new ArrayList<Usuario>();
-    private static ArrayList<Animal> animales = new ArrayList<Animal>();
+    private static ArrayList<Empresa> empresas = new ArrayList<Empresa>();
 
-    private static void rellenarInfoInicial() {
-
-        usuarios.clear();
-        usuarios.add(new Usuario(1, "admin", "admin"));
-        animales.add(new Animal(1, 'M', true, true, new Date("04/03/2020"), new Date("12/04/2019"), new Animal(),
-                new Animal()));
-        animales.add(new Animal(2, 'H', false, true, null, new Date("12/04/2019"), new Animal(), new Animal()));
-
+    public static void listarEmpresas(){
+        for (int i = 0; i <empresas.size() ; i++) {
+            System.out.println(empresas.get(i).toString());
+        }
     }
-
+    public static void inicializarDatos(){
+        Empresa unaEmpresa = new Empresa(1, "Agricola");
+        ArrayList<Animal> animales = new ArrayList<Animal>();
+        animales.add(new Animal(1, 'M', true, true, "Vacuno", null, null));
+        animales.add(new Animal(2, 'H', true, true, "Vacuno", null, null));
+        animales.add(new Animal(3, 'M', true, true, "Ovino", null, null));
+        animales.add(new Animal(4, 'H', true, true, "Ovino", null, null));
+        unaEmpresa.getUsuarios().add(new Usuario(1, "admin", "admin"));
+        unaEmpresa.setAnimales(animales);
+        empresas.add(unaEmpresa);
+    }
     public static void main(String[] args) {
         try {
-            System.out.println("** MENÚ PRINCIPAL **");
-            rellenarInfoInicial();
-            altaEmpresa();
-            login();
+            inicializarDatos();
+            menuPrincipal();
         } catch (Exception e) {
             System.out.println("No se pudo acceder");
+            main(args);
         }
+    }
+    private static void menuPrincipal(){
+        try {
+            System.out.println("** MENÚ PRINCIPAL **");
+            listarEmpresas();
+            System.out.println("Seleccione una de las empresas listadas o ingrese -1 para administrarlas");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+            switch (opcion) {
+                case -1:
+                    administrarEmpresas();
+                    break;
+                default:
+                    login(opcion);
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Hubo un problema con la operación");
+            menuPrincipal();
+        }
+
     }
 
     // EMPRESAS
+
+    private static void administrarEmpresas(){
+        try {
+            System.out.println("Administración empresas (0 para salir):");
+            System.out.println("1. Alta");
+            System.out.println("2. Eliminar");
+            System.out.println("3. Modificar");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+
+            switch (opcion) {
+                case 1:
+                    altaEmpresa();
+                    break;
+                case 2:
+                    bajaEmpresa();
+                    break;
+                case 3:
+                    modificarEmpresa();
+                    break;            
+                default:
+                    menuPrincipal();
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Ocurrió un error en el programa");
+            administrarEmpresas();
+        }
+    }
+    private static int generarIdEmpresa(){
+        return empresas.size()+1;
+    }
     private static void altaEmpresa() {
         try {
-            System.out.println("Ingrese nombre de la empresa");
+            System.out.println("Alta de empresa");
+            System.out.println("Ingrese nombre de la empresa (0 para salir)");
             String nombre = entrada.nextLine();
+            if(!nombre.equals("0")){
 
-            Empresa unaEmpresa = new Empresa(1, nombre);
-            empresaSelec = unaEmpresa;
+                Empresa unaEmpresa = new Empresa(generarIdEmpresa(), nombre);
+                System.out.println("Agregando datos iniciales");
+                unaEmpresa.getAnimales().add(new Animal(generarIdAnimal(), 'M', true, true, "Vacuno", null, null));
+                unaEmpresa.getAnimales().add(new Animal(generarIdAnimal(), 'H', true, true, "Vacuno", null, null));
+                unaEmpresa.getAnimales().add(new Animal(generarIdAnimal(), 'M', true, true, "Ovino", null, null));
+                unaEmpresa.getAnimales().add(new Animal(generarIdAnimal(), 'H', true, true, "Ovino", null, null));
+                empresas.add(unaEmpresa);
+                
+                System.out.println("Empresa agregada con éxito");
+                administrarEmpresas();
+            }
+            else{
+                administrarEmpresas();
+            }
+            
         } catch (Exception e) {
             System.out.println("No se pudo realizar la operación");
+            altaEmpresa();
         }
     }
 
-    // USUARIOS
-    private static void login() {
+    private static void bajaEmpresa(){
         try {
+            
+            System.out.println("Baja de empresa");
+            listarEmpresas();
+            System.out.println("Elija una opción de las listadas a eliminar (0 para salir)");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+            if(opcion!=0){
 
-            System.out.println("Ingreso al sistema");
+                empresas.remove(opcion-1);
+                System.out.println("Empresa eliminada con éxito");
+                administrarEmpresas();
+            }
+            else{
+                administrarEmpresas();
+            }
+        } catch (Exception e) {
+            System.out.println("No se pudo realizar la operación");
+            bajaEmpresa();
+        }
+    }
+ 
+    private static void modificarEmpresa(){
+        try {
+            System.out.println("Modificación de empresas");
+            listarEmpresas();
+            System.out.println("Elija la empresa de las listadas a modificar (0 para salir)");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+            if(opcion!=0){
+
+                System.out.println("Ingrese nombre:");
+                String nombreEmp = entrada.nextLine();
+                empresas.get(opcion-1).setNombreEmpresa(nombreEmp);
+                System.out.println("Empresa modificada con éxito.");
+                administrarEmpresas();
+            }
+            else{
+                administrarEmpresas();
+            }
+        } catch (Exception e) {
+            System.out.println("No se pudo realizar la operación");
+            modificarEmpresa();
+        }
+    }
+    // USUARIOS
+    private static void login(int idEmpresa) {
+        try {
+            System.out.println("Log-In");
+            System.out.println("Ingreso al sistema (0 para salir)");
             System.out.println("1. Iniciar sesión");
             System.out.println("2. Registrar usuario");
-            int opcion = entrada.nextInt();
-            entrada.nextLine();
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
             if (opcion == 1)
-                iniciarSesion();
-            else
-                registrarUsuario();
+                iniciarSesion(idEmpresa);
+            else if(opcion==2)
+                registrarUsuario(idEmpresa);
+            else if (opcion ==0)
+                menuPrincipal();
+            else{
+                System.out.println("Ingrese una opción válida");
+                login(idEmpresa);
+            }
+
         } catch (Exception e) {
             System.out.println("No se pudo acceder a la sección");
-            login();
+            login(idEmpresa);
         }
     }
 
-    private static void iniciarSesion() {
+    private static void iniciarSesion(int idEmpresa) {
         try {
             boolean contr = false;
             System.out.println("Inicio de sesión");
-            System.out.println("Ingrese usuario:");
+            System.out.println("Ingrese usuario: (0 para salir)");
             String usuario = entrada.nextLine();
-            System.out.println("Ingrese contraseña");
-            String contrasena = entrada.nextLine();
-            for (int i = 0; i < usuarios.size(); i++) {
-                if (usuario.equals(usuarios.get(i).getUsuario())
-                        && contrasena.equals(usuarios.get(i).getContraseña())) {
-                    contr = true;
-                    System.out.println("Inició sesión con éxito");
-                    menuAnimales();
+            
+            if(!usuario.equals("0")){
+                System.out.println("Ingrese contraseña");
+                String contrasena = entrada.nextLine();
+                Empresa empresa = empresas.get(idEmpresa-1);
+                for (int i = 0; i < empresa.getUsuarios().size(); i++) {
+                    if (usuario.equals(empresa.getUsuarios().get(i).getUsuario())
+                            && contrasena.equals(empresa.getUsuarios().get(i).getContraseña())) {
+                        contr = true;
+                        System.out.println("Inició sesión con éxito");
+                        menuAnimales(idEmpresa);
+                    }
+                }
+                if (contr == false) {
+
+                    System.out.println("No se pudo iniciar sesión.");
+                    login(idEmpresa);
                 }
             }
-            if (contr == false) {
-
-                System.out.println("No se pudo iniciar sesión.");
-                login();
+            else{
+                login(idEmpresa);
             }
-
+        
         } catch (Exception e) {
             System.out.println("No se pudo iniciar sesión.");
-            iniciarSesion();
+            iniciarSesion(idEmpresa);
         }
     }
 
-    private static void registrarUsuario() {
+    private static void registrarUsuario(int idEmpresa) {
         try {
             System.out.println("Registro de usuario");
-            System.out.println("Ingrese usuario:");
+            System.out.println("Ingrese usuario: (0 para salir)");
             String usuario = entrada.nextLine();
+            
+            if(!usuario.equals("0")){
             System.out.println("Ingrese contraseña");
             String contrasena = entrada.nextLine();
             System.out.println("Confirme contraseña:");
             String confContr = entrada.nextLine();
+            Empresa empresa = empresas.get(idEmpresa-1);
 
-            if (contrasena.equals(confContr)) {
-                usuarios.add(new Usuario(generarIdUsuario(), usuario, contrasena));
-                System.out.println("Usuario agregado con éxito");
-                login();
-            } else {
-                throw new Exception();
+                if (contrasena.equals(confContr)) {
+                    ArrayList<Usuario> listaUsuarios = empresa.getUsuarios();
+                    listaUsuarios.add(new Usuario(generarIdUsuario(), usuario, contrasena));
+                    empresa.setUsuarios(listaUsuarios);
+                    System.out.println("Usuario agregado con éxito");
+                    login(idEmpresa);
+                } else {
+                    throw new Exception();
+                }
+            }
+            else{
+                login(idEmpresa);
             }
         } catch (Exception e) {
             System.out.println("No se pudo registrar el usuario, inténtelo nuevamente.");
-            registrarUsuario();
+            registrarUsuario(idEmpresa);
         }
     }
 
     private static int generarIdUsuario() {
-        return usuarios.size() - 1;
+        return buscarTodosLosUsuarios().size()+1;
     }
 
     // ANIMALES
 
-    private static void menuAnimales() {
+    private static void menuAnimales(int idEmpresa) {
         try {
+            System.out.println("Menú principal animales.");
             System.out.println("Ingrese una opción: ");
             System.out.println("1. Administrar animales.");
             System.out.println("2. Agregar vacunas y desparasitación.");
             System.out.println("3. Listar separando por especie.");
             System.out.println("4. Listar genealogía por identificador.");
             System.out.println("5. Listar animal por identificador.");
-            int opcion = entrada.nextInt();
-            entrada.nextLine();
+            System.out.println("0. Volver");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
             switch (opcion) {
                 case 1: {
-                    administracionAnimales();
-                } /*
-                   * case 2:{
-                   * administrarVacunas();
-                   * }
-                   * case 3:{
-                   * listarPorEspecie();
-                   * }
-                   * case 4:{
-                   * listarGenPorIdentificador();
-                   * }
-                   * case 5:{
-                   * listarPorIdentificador();
-                   * }
-                   */
+                    administracionAnimales(idEmpresa);
+                    break;
+                }
+                case 2:{
+                    vacunasYDesparasitacion(idEmpresa);
+                    break;
+                }
+                case 3:{
+                    listarPorEspecie(idEmpresa);
+                    System.out.println("Ingrese cualquier tecla para volver al menú");
+                    entrada.next();
+                    menuAnimales(idEmpresa);
+                    break;
+                }
+                case 4:{
+                    System.out.println("Ingrese el id del animal a buscar genealogía");
+                    int idAnimal = Integer.parseInt(entrada.next());
+                    entrada.nextLine();
+                    System.out.println("Listando para ID " +idAnimal);
+                    listarGenealogia(buscarAnimalPorId(idAnimal));
+                    System.out.println("Ingrese cualquier tecla para volver al menú");
+                    entrada.next();
+                    menuAnimales(idEmpresa);
+                    break;
+                }
+                case 5:{
+                    System.out.println("Ingrese el id del animal a buscar");
+                    int idAnimal = Integer.parseInt(entrada.next());
+                    entrada.nextLine();
+                    System.out.println(buscarAnimalPorId(idAnimal));
+                    System.out.println("Ingrese cualquier tecla para volver al menú");
+                    entrada.next();
+                    menuAnimales(idEmpresa);
+                    break;
+                }
+
+                default: {
+                    login(idEmpresa);
+                    break;
+                }
             }
         } catch (Exception e) {
             System.out.println("No se pudo realizar la operación");
+            menuAnimales(idEmpresa);
         }
     }
 
-    private static void administracionAnimales() {
+    private static void administracionAnimales(int idEmpresa) {
         try {
+            System.out.println("Administración de animales");
             System.out.println("Ingrese una opción: ");
             System.out.println("1. Agregar animal");
             System.out.println("2. Eliminar animal");
             System.out.println("3. Modificar animal");
-            int opcion = entrada.nextInt();
-            entrada.nextLine();
+            System.out.println("0. Volver");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
 
             switch (opcion) {
                 case 1: {
-                    agregarAnimal();
+                    agregarAnimal(idEmpresa);
+                    break;
                 }
                 case 2: {
-                    eliminarAnimal();
+                    eliminarAnimal(idEmpresa);
+                    break;
                 }
                 case 3: {
-                    modificarAnimal();
+                    modificarAnimal(idEmpresa);
+                    break;
+                }
+                default: {
+                    menuAnimales(idEmpresa);
+                    break;
                 }
             }
         } catch (Exception e) {
             System.out.println("No se pudo realizar la operación");
+            administracionAnimales(idEmpresa);
         }
     }
 
     private static int generarIdAnimal() {
-
-        return animales.size() - 1;
+        return buscarTodosLosAnimales().size()+1;
     }
 
-    private static void agregarAnimal() {
+    private static void agregarAnimal(int idEmpresa) {
         try {
-            System.out.println("Ingrese sexo del animal");
+            System.out.println("Agregar animal");
+            System.out.println("Ingrese sexo del animal M o H (0 para salir)");
             char sexo = entrada.nextLine().charAt(0);
-            System.out.println("¿El animal ha sido desparasitado? (S/N)");
-            char desparasitado = entrada.nextLine().charAt(0);
-            System.out.println("¿El animal ha sido vacunado? (S/N)");
-            char vacunado = entrada.nextLine().charAt(0);
+            if(sexo!='0'){
+                System.out.println("¿El animal ha sido desparasitado? (S/N)");
+                char desparasitado = entrada.nextLine().charAt(0);
+                System.out.println("¿El animal ha sido vacunado? (S/N)");
+                char vacunado = entrada.nextLine().charAt(0);
+                int tipo=0;
+                do {
+                    System.out.println("Seleccione número de tipo: 1. Vacuno, 2. Ovino");
+                    tipo = Integer.parseInt(entrada.next());
+                    entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+                } while (tipo!=1 && tipo!=2);
+    
+                String tipoS ="";
+                if(tipo==1){
+                    tipoS="Vacuno";
+                }
+                else if(tipo==2){
+                    tipoS="Ovino";
+                }
+    
+                listarPorSexoyTipo(idEmpresa, 'M', tipoS);
+                System.out.println("Seleccione el número del padre de los animales de arriba:");
+                int padre = Integer.parseInt(entrada.next());
+                entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+    
+                listarPorSexoyTipo(idEmpresa, 'H', tipoS);
+                System.out.println("Seleccione el número de la madre de los animales de arriba:");
+                int madre = Integer.parseInt(entrada.next());
+                entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+    
+                boolean desparasitadoB;
+                if (String.valueOf(desparasitado).toUpperCase().charAt(0) == 'S')
+                    desparasitadoB = true;
+                else
+                    desparasitadoB = false;
+    
+                boolean vacunadoB;
+                if (String.valueOf(vacunado).toUpperCase().charAt(0) == 'S')
+                    vacunadoB = true;
+                else
+                    vacunadoB = false;
+    
 
-            listarPorSexo('M');
-            System.out.println("Seleccione el padre de los animales de arriba:");
-            int padre = entrada.nextInt();
-            entrada.nextLine();
-
-            listarPorSexo('H');
-            System.out.println("Seleccione la madre de los animales de arriba:");
-            int madre = entrada.nextInt();
-            entrada.nextLine();
-
-            boolean desparasitadoB;
-            if (String.valueOf(desparasitado).toUpperCase().charAt(0) == 'S')
-                desparasitadoB = true;
-            else
-                desparasitadoB = false;
-
-            boolean vacunadoB;
-            if (String.valueOf(vacunado).toUpperCase().charAt(0) == 'S')
-                vacunadoB = true;
-            else
-                vacunadoB = false;
-
-            Animal APadre = buscarAnimal(padre);
-            Animal AMadre = buscarAnimal(madre);
-
-            animales.add(new Animal(generarIdAnimal(), sexo, desparasitadoB, vacunadoB, APadre, AMadre));
-            System.out.println("Animal agregado con éxito");
-            administracionAnimales();
-        } catch (Exception e) {
-            System.out.println("No se pudo realizar la operación"+e.getMessage());
-        }
-    }
-
-    private static void eliminarAnimal() {
-        try {
-            listarAnimales();
-            System.out.println("Ingrese número de animal a eliminar");
-            int opcion = entrada.nextInt();
-            entrada.nextLine();
-
-            Animal animal = buscarAnimal(opcion);
-            animales.remove(animal);
-            administracionAnimales();
+                Empresa empresa = empresas.get(idEmpresa-1);
+                
+                Animal APadre = empresa.getAnimales().get(padre-1);
+                Animal AMadre = empresa.getAnimales().get(madre-1);
+                empresa.getAnimales().add(new Animal(generarIdAnimal(), String.valueOf(sexo).toUpperCase().charAt(0), desparasitadoB, vacunadoB, tipoS, APadre, AMadre));
+                System.out.println("Animal agregado con éxito");
+                administracionAnimales(idEmpresa);
+            }
+            else{
+                administracionAnimales(idEmpresa);
+            }
+            
         } catch (Exception e) {
             System.out.println("No se pudo realizar la operación");
+            agregarAnimal(idEmpresa);
         }
     }
 
-    private static void modificarAnimal() {
+    private static void eliminarAnimal(int idEmpresa) {
         try {
-            listarAnimales();
-            System.out.println("Ingrese número de animal a modificar");
-            int opcion = entrada.nextInt();
-            entrada.nextLine();
+            System.out.println("Eliminar animales");
+            listarAnimales(idEmpresa);
+            System.out.println("Ingrese número de animal a eliminar (0 para salir)");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+            if(opcion!=0){
 
-            Animal temp = buscarAnimal(opcion);
-            System.out.println("Ingrese sexo del animal");
-            System.out.println("Anterior valor: " + temp.getSexo());
-            char sexo = entrada.nextLine().charAt(0);
-            System.out.println("¿El animal ha sido desparasitado? (S/N)");
-            System.out.println("Anterior valor: " + temp.isDesparasitado());
-            char desparasitado = entrada.nextLine().charAt(0);
-            System.out.println("¿El animal ha sido vacunado? (S/N)");
-            System.out.println("Anterior valor: " + temp.isVacunado());
-            char vacunado = entrada.nextLine().charAt(0);
-
-            listarPorSexo('M');
-            System.out.println("Seleccione el padre de los animales de arriba:");
-            System.out.println("Anterior valor: " + temp.getPadre().toString());
-            int padre = entrada.nextInt();
-            entrada.nextLine();
-
-            listarPorSexo('H');
-            System.out.println("Seleccione la madre de los animales de arriba:");
-            System.out.println("Anterior valor: " + temp.getMadre().toString());
-            int madre = entrada.nextInt();
-            entrada.nextLine();
-
-            boolean desparasitadoB;
-            if (String.valueOf(desparasitado).toUpperCase().charAt(0) == 'S')
-                desparasitadoB = true;
-            else
-                desparasitadoB = false;
-
-            boolean vacunadoB;
-            if (String.valueOf(vacunado).toUpperCase().charAt(0) == 'S')
-                vacunadoB = true;
-            else
-                vacunadoB = false;
-
-            Animal APadre = buscarAnimal(padre);
-            Animal AMadre = buscarAnimal(madre);
-
-            animales.add(opcion, new Animal(temp.getIdAnimal(), sexo, desparasitadoB, vacunadoB, APadre, AMadre));
-            administracionAnimales();
+                Empresa empresa = empresas.get(idEmpresa-1);
+                empresa.getAnimales().remove(opcion-1);
+                administracionAnimales(idEmpresa);
+            }
+            else{
+                administracionAnimales(idEmpresa);
+            }
         } catch (Exception e) {
             System.out.println("No se pudo realizar la operación");
+            eliminarAnimal(idEmpresa);
         }
     }
 
-    private static Animal buscarAnimal(int pos) {
-        return animales.get(pos);
-    }
+    private static void modificarAnimal(int idEmpresa) {
+        try {
+            System.out.println("Modificar animales");
+            listarAnimales(idEmpresa);
 
-    // Listados animales
+            System.out.println("Ingrese número de animal a modificar (0 para salir)");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+            if(opcion!=0){
+                
+                Empresa empresa = empresas.get(idEmpresa-1);
+                Animal temp = empresa.getAnimales().get(opcion-1);
+                System.out.println("Ingrese sexo del animal (M o H)");
+                System.out.println("Anterior valor: " + temp.getSexo());
+                char sexo = String.valueOf(entrada.nextLine().charAt(0)).toUpperCase().charAt(0);
+                empresa.getAnimales().get(opcion-1).setSexo(String.valueOf(sexo).toUpperCase().charAt(0));
+                System.out.println("Ingrese el número de tipo: 1. Vacuno, 2. Ovino");
+                System.out.println("Anterior valor: " + temp.getTipo());
+                int tipo = Integer.parseInt(entrada.next());
+                entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+                empresa.getAnimales().get(opcion-1).setSexo(sexo);
+                System.out.println("¿El animal ha sido desparasitado? (S/N)");
+                System.out.println("Anterior valor: " + temp.isDesparasitado());
+                char desparasitado = entrada.nextLine().charAt(0);
+                System.out.println("¿El animal ha sido vacunado? (S/N)");
+                System.out.println("Anterior valor: " + temp.isVacunado());
+                char vacunado = entrada.nextLine().charAt(0);
 
-    private static void listarAnimales() {
-        for (int i = 0; i < animales.size(); i++) {
-            System.out.println(i + animales.get(i).toString());
+                String tipoS = "";
+                if(tipo==1)
+                    tipoS="Vacuno";
+                else if(tipo==2)
+                    tipoS="Ovino";
+
+                listarPorSexoyTipo(idEmpresa, 'M', tipoS);
+                System.out.println("Seleccione el número del padre de los animales de arriba:");
+                System.out.println("Anterior valor: " + temp.getPadre().toString());
+                int padre = Integer.parseInt(entrada.next());
+                entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+                listarPorSexoyTipo(idEmpresa, 'H', tipoS);
+                System.out.println("Seleccione el número de la madre de los animales de arriba:");
+                System.out.println("Anterior valor: " + temp.getMadre().toString());
+                int madre = Integer.parseInt(entrada.next());
+                entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+
+                boolean desparasitadoB;
+                if (String.valueOf(desparasitado).toUpperCase().charAt(0) == 'S')
+                    desparasitadoB = true;
+                else
+                    desparasitadoB = false;
+
+                temp.setDesparasitado(desparasitadoB);
+
+                boolean vacunadoB;
+                if (String.valueOf(vacunado).toUpperCase().charAt(0) == 'S')
+                    vacunadoB = true;
+                else
+                    vacunadoB = false;
+
+                temp.setVacunado(vacunadoB);
+
+                Animal APadre = empresa.getAnimales().get(padre-1);
+                if(!(APadre.getTipo()==tipoS) || !(APadre.getSexo()=='M'))
+                    throw new Exception();
+                
+                Animal AMadre = empresa.getAnimales().get(madre-1);
+
+                if(!(AMadre.getTipo()==tipoS) || !(AMadre.getSexo()=='H'))
+                    throw new Exception();
+                empresa.getAnimales().get(opcion-1).setMadre(AMadre);
+                empresa.getAnimales().get(opcion-1).setPadre(APadre);
+                System.out.println("Animal modificado con éxito");
+                administracionAnimales(idEmpresa);
+            }
+            else{
+                administracionAnimales(idEmpresa);
+            }
+        } catch (Exception e) {
+            System.out.println("No se pudo realizar la operación");
+            modificarAnimal(idEmpresa);
         }
     }
 
-    private static void listarPorSexo(char sexo) {
-        for (int i = 0; i < animales.size(); i++) {
-            if (animales.get(i).getSexo() == sexo)
-                System.out.println(i + ". "+animales.get(i).toString());
+    private static void vacunasYDesparasitacion(int idEmpresa){
+        
+        try{
+            System.out.println("Agregar vacunas y desparasitación");
+            listarAnimales(idEmpresa);
+            System.out.println("Seleccione nro de animal de los listados arriba (0 para salir, -1 para listar)");
+            int opcion = Integer.parseInt(entrada.next());
+            entrada.nextLine(); // Necesario para desbuggear el entrada.next()
+            if(opcion>0){
+                Empresa empresa = empresas.get(idEmpresa-1);
+                Animal unAnimal = empresa.getAnimales().get(opcion-1);
+                if(unAnimal.isDesparasitado()){
+                    System.out.println("Ingrese la fecha de desparasitación (DD/MM/AAAA).");
+                    Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse(entrada.nextLine());
+                    unAnimal.setFechaDesparasitado(fecha);
+                }
+                else{
+                    System.out.println("El animal no está disparasitado, modifique el animal antes a editar la fecha.");
+                }
+                if(unAnimal.isVacunado()){
+                    System.out.println("Ingrese la fecha de vacunación (DD/MM/AAAA).");
+                    Date fecha = new SimpleDateFormat("dd/MM/yyyy").parse(entrada.nextLine());
+                    unAnimal.setFechaVacunado(fecha);
+                }
+                else{
+                    System.out.println("El animal no está vacunado, modifique el animal antes a editar la fecha.");
+                }
+                System.out.println("Fechas administradas con éxito.");
+                menuAnimales(idEmpresa);
+            }
+            else if(opcion==-1){
+                listarAnimalesConFecha(idEmpresa);
+                vacunasYDesparasitacion(idEmpresa);
+            }
+            else{
+                menuAnimales(idEmpresa);
+            }
         }
+        catch(Exception e){
+            System.out.println("No se pudo realizar la operación");
+            vacunasYDesparasitacion(idEmpresa);
+        }
+    }
+    
+    // Listados
+
+    private static void listarAnimales(int idEmpresa) {
+        Empresa empresa = empresas.get(idEmpresa-1);
+        for (int i = 0; i < empresa.getAnimales().size(); i++) {
+            System.out.println(empresa.getAnimales().get(i).toString());
+        }
+    }
+
+    private static void listarAnimalesConFecha(int idEmpresa) {
+        Empresa empresa = empresas.get(idEmpresa-1);
+        for (int i = 0; i < empresa.getAnimales().size(); i++) {
+            System.out.println(empresa.getAnimales().get(i).toStringConFecha());
+        }
+    }
+    
+    private static void listarPorSexoyTipo(int idEmpresa, char sexo, String tipo) {
+        Empresa empresa = empresas.get(idEmpresa-1);
+
+        for (int i = 0; i < empresa.getAnimales().size(); i++) {
+            if (empresa.getAnimales().get(i).getSexo() == sexo && empresa.getAnimales().get(i).getTipo()==tipo)
+                System.out.println(empresa.getAnimales().get(i).toString());
+        }
+    }
+
+    private static void listarPorEspecie(int idEmpresa){
+        Empresa empresa = empresas.get(idEmpresa-1);
+        System.out.println("Vacunos:");
+        for (int i = 0; i < empresa.getAnimales().size(); i++) {
+            if(empresa.getAnimales().get(i).getTipo().equals("Vacuno")){
+                System.out.println(empresa.getAnimales().get(i).toString());
+            }
+        }
+        System.out.println("Ovinos:");
+        for (int i = 0; i < empresa.getAnimales().size(); i++) {
+            if(empresa.getAnimales().get(i).getTipo().equals("Ovino")){
+                System.out.println(empresa.getAnimales().get(i).toString());
+            }
+        }
+    }
+
+    // Aplicamos conceptos de árbol binario
+    private static void listarGenealogia(Animal animal){
+        if(animal!=null){
+
+            System.out.println("Padre de ID "+animal.getIdAnimal());
+            System.out.println(animal.getPadre());
+            
+            System.out.println("Madre de ID "+animal.getIdAnimal());
+            System.out.println(animal.getMadre());
+
+            listarGenealogia(animal.getPadre());
+            listarGenealogia(animal.getMadre());
+            
+        }
+        
+    }
+    private static Animal buscarAnimalPorId(int idAnimal){
+        ArrayList<Animal> listaCompleta = new ArrayList<Animal>();
+        for (Empresa empresa : empresas) {
+            listaCompleta.addAll(empresa.getAnimales());
+        }
+        Animal animal = buscarAnimal(idAnimal, listaCompleta, 0, listaCompleta.size()-1);
+        return animal;
+    }
+
+    // Aplicamos recursividad y búsqueda binaria para el ID
+    private static Animal buscarAnimal(int idAnimal, ArrayList<Animal> animales, int desde, int hasta){
+        if(desde==hasta){
+            if(animales.get(hasta).getIdAnimal()==idAnimal){
+                return animales.get(hasta);
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            int medio = (desde+hasta) / 2;
+            if(animales.get(medio).getIdAnimal()<idAnimal){
+                return buscarAnimal(idAnimal, animales, medio+1, hasta);
+            }
+            else{
+                return buscarAnimal(idAnimal, animales, desde, medio);
+            }
+        }
+
+    }
+
+    // Utils extras
+
+    private static ArrayList<Animal> buscarTodosLosAnimales(){
+        ArrayList<Animal> todo = new ArrayList<Animal>();
+        for (Empresa empresa : empresas) {
+            todo.addAll(empresa.getAnimales());
+        }
+        return todo;
+    }
+    
+    private static ArrayList<Usuario> buscarTodosLosUsuarios(){
+        ArrayList<Usuario> todo = new ArrayList<Usuario>();
+        for (Empresa empresa : empresas) {
+            todo.addAll(empresa.getUsuarios());
+        }
+        return todo;
     }
 }
